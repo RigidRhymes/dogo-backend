@@ -1,5 +1,4 @@
 import {app} from './server';
-import {db} from './db';
 import mongoose from 'mongoose';
 
 
