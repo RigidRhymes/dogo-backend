@@ -1,18 +1,12 @@
 import {app} from './server';
-import mongoose from 'mongoose';
+import {connectDB} from "./db/index";
 
 
-const MONGO_URI = process.env.MONGODB_URI
+
 const PORT = process.env.PORT || 4000;
 
 
-if(!MONGO_URI){
-    console.error('MongoDB URI is missing');
-    process.exit(1)
-}
-
-mongoose.connect(MONGO_URI)
-    .then(() => {
+connectDB().then(() => {
         console.log("Database connected to MongoDB atlas");
         app.listen(PORT, () => {
             console.log(`server running at http:localhost:${PORT}`);
