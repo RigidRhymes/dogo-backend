@@ -2,7 +2,7 @@ import { Router, Request } from 'express';
 
 import { createScan, getScan, updateScanResult } from "@/db/scan.model";
 import { scanEmailRisk } from "./scanEmailRisk"
-import {requireAuth} from "@/middleware/requireAuth";
+import {requireAuth} from "../middleware/requireAuth";
 
 
 // This file is for search mentions

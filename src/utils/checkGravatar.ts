@@ -1,5 +1,5 @@
 import crypto from "crypto"
-import type { ScanResult } from "@/api/scanEmailRisk";
+import type { ScanResult } from "../api/scanEmailRisk";
 
 export async function checkGravatar(email: string): Promise<boolean> {
     const hash = crypto.createHash("md5").update(email.trim().toLowerCase()).digest("hex")
