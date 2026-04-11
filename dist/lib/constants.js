@@ -6,7 +6,7 @@ exports.NAV_ITEMS = [
     { href: '/', label: 'HOME' },
     { href: '/email-check', label: 'EMAIL CHECK' },
     { href: '/social-media-check', label: 'SOCIAL MEDIA CHECK' },
-    { href: '/phone-number-check', label: 'PHONE NUMBER CHECK' },
+    { href: '/email-number-check', label: 'PHONE NUMBER CHECK' },
     { href: '/blog', label: 'ABOUT' },
 ];
 exports.CARD_ITEMS = [

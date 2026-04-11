@@ -12,7 +12,7 @@ if (!cached) {
 }
 const connectToDatabase = async () => {
     if (!MONGODB_URI)
-        throw new Error('MONGODB_URI must be set within .env.local');
+        throw new Error('MONGODB_URI must be set within .env.local.local');
     if (cached.conn)
         return cached.conn;
     if (!cached.promise) {
