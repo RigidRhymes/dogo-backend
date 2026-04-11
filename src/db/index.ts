@@ -8,7 +8,6 @@ const MONGO_URI = process.env.MONGODB_URI!;
 
 export async function connectDB() {
     try {
-    console.log("MONGODB_URI:", process.env.MONGODB_URI)
         await mongoose.connect(MONGO_URI);
         console.log("✅ Connected to MongoDB");
     } catch (err) {

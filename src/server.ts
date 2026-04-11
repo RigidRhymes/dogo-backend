@@ -2,6 +2,8 @@ import express from 'express';
 import {scanRouter} from "./api/scan.route";
 import cors from 'cors'
 import fetch from "node-fetch"
+import jwt from "jsonwebtoken";
+import {requireAuth} from "@/middleware/requireAuth";
 
 
 export const app = express();
@@ -12,7 +14,18 @@ app.use(cors({
 }))
 app.use(express.json())
 
-app.use('/api/scan', scanRouter)
+app.post("/login", (req, res) => {
+    const payload = {id: "test-user", email: "test@example.com"};
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET!, {
+        expiresIn: "1h",
+        algorithm: "HS256",
+    })
+
+    res.json({token})
+})
+
+app.use('/api/scan', requireAuth, scanRouter)
 
 app.get("/ai-test", async (req, res) => {
     const prompt = "Summarize risks of using an email found in breach.";
