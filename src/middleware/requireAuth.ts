@@ -1,45 +1,19 @@
 import { Request, Response, NextFunction } from "express";
-import fetch from "node-fetch"; // or global fetch if Node 18+
+import jwt from "jsonwebtoken";
 
-type Session = {
-    user: {
-        id: string;
-        email?: string;
-    };
-};
+type RequestWithUser = Request & { user?: { id: string; email?: string } };
 
-type RequestWithUser = Request & {
-    user?: { id: string; email?: string };
-};
+export function requireAuth(req: RequestWithUser, res: Response, next: NextFunction) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: "Unauthorized" });
 
-export async function requireAuth(req: RequestWithUser, res: Response, next: NextFunction) {
+    const token = authHeader.split(" ")[1];
     try {
-        const authHeader = req.headers.authorization;
-        if (!authHeader) {
-            return res.status(401).json({ error: "Unauthorized" });
-        }
-
-        const token = authHeader.split(" ")[1];
-
-        const response = await fetch(`${process.env.BETTERAUTH_URL}/api/session`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!response.ok) {
-            return res.status(401).json({ error: "Unauthorized" });
-        }
-
-        // Explicitly cast the JSON result to Session
-        const session: Session = await response.json() as Session;
-
-        req.user = {
-            id: session.user.id,
-            email: session.user.email,
-        };
-
-        return next();
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string; email?: string };
+        req.user = { id: decoded.id, email: decoded.email };
+        next();
     } catch (err) {
         console.error("Auth check failed:", err);
-        return res.status(500).json({ error: "Server error during auth" });
+        return res.status(401).json({ error: "Invalid token" });
     }
 }
