@@ -1,17 +1,25 @@
 import {app} from './server';
 import {db} from './db';
+import mongoose from 'mongoose';
 
 
+const MONGO_URI = process.env.MONGODB_URI
 const PORT = process.env.PORT || 4000;
 
-db.connect()
-.then(() => {
-    console.log('Database connected to PostgresSQL');
-    app.listen(PORT, () => {
-        console.log(`Server running at http://localhost:${PORT}`)
+
+if(!MONGO_URI){
+    console.error('MongoDB URI is missing');
+    process.exit(1)
+}
+
+mongoose.connect(MONGO_URI)
+    .then(() => {
+        console.log("Database connected to MongoDB atlas");
+        app.listen(PORT, () => {
+            console.log(`server running at http:localhost:${PORT}`);
+        });
     })
-})
-.catch(err => {
-    console.error('PostgresSQL connection failed:', err)
-    process.exit(1);
-})
+    .catch((err: Error ) => {
+        console.error("MongoDB connection failed:", err);
+        process.exit(1);
+    })
