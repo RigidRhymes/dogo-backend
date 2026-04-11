@@ -1,50 +1,57 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ScanModel = void 0;
 exports.createScan = createScan;
 exports.getScan = getScan;
-exports.updateScanStatus = updateScanStatus;
 exports.updateScanResult = updateScanResult;
-const index_1 = require("./index");
-const BREACH_TABLE = 'breachdb';
-async function ensureBreachTable() {
-    await index_1.db.query(`
-        CREATE TABLE IF NOT EXISTS ${BREACH_TABLE} (
-            id TEXT PRIMARY KEY,
-            user_id TEXT NOT NULL,
-            email TEXT NOT NULL,
-            status TEXT NOT NULL,
-            result JSONB,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
-    `);
-}
+const mongoose_1 = __importStar(require("mongoose"));
+const ScanSchema = new mongoose_1.Schema({
+    userId: { type: String, required: true },
+    email: { type: String, required: true },
+    status: { type: String, default: "queued" },
+    result: { type: Object },
+}, { timestamps: true });
+exports.ScanModel = mongoose_1.default.model("Scan", ScanSchema);
 async function createScan(userId, email) {
-    await ensureBreachTable();
-    const scanId = `scan-${Date.now()}`;
-    const result = await index_1.db.query(`INSERT INTO ${BREACH_TABLE} (id, user_id, email, status, created_at, updated_at)
-         VALUES ($1, $2, $3, 'queued', NOW(), NOW()) RETURNING id`, [scanId, userId, email]);
-    return result.rows[0];
+    const scan = new exports.ScanModel({ userId, email, status: "queued" });
+    return await scan.save();
 }
 async function getScan(id, userId) {
-    await ensureBreachTable();
-    const result = await index_1.db.query(`SELECT id, user_id, email, status, result, created_at, updated_at FROM ${BREACH_TABLE}
-         WHERE id = $1 AND user_id = $2`, [id, userId]);
-    return result.rows[0] ?? null;
+    return await exports.ScanModel.findOne({ _id: id, userId });
 }
-async function updateScanStatus(id, status) {
-    await ensureBreachTable();
-    const result = await index_1.db.query(`UPDATE ${BREACH_TABLE}
-         SET status = $2, updated_at = NOW()
-         WHERE id = $1
-         RETURNING id, user_id, email, status, result, created_at, updated_at`, [id, status]);
-    return result.rows[0] ?? null;
-}
-async function updateScanResult(id, scanResult, status) {
-    await ensureBreachTable();
-    const result = await index_1.db.query(`UPDATE ${BREACH_TABLE}
-         SET status = $2, result = $3, updated_at = NOW()
-         WHERE id = $1
-         RETURNING id, user_id, email, status, result, created_at, updated_at`, [id, status, scanResult]);
-    return result.rows[0] ?? null;
+async function updateScanResult(id, result, status) {
+    return await exports.ScanModel.findByIdAndUpdate(id, { result, status }, { new: true });
 }

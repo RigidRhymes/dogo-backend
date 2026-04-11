@@ -4,7 +4,7 @@ exports.scanRouter = void 0;
 const express_1 = require("express");
 const scan_model_1 = require("@/db/scan.model");
 const scanEmailRisk_1 = require("./scanEmailRisk");
-const requireAuth_1 = require("@/middleware/requireAuth");
+const requireAuth_1 = require("../middleware/requireAuth");
 // This file is for search mentions
 exports.scanRouter = (0, express_1.Router)();
 exports.scanRouter.post('/', requireAuth_1.requireAuth, async (req, res) => {
