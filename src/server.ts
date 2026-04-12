@@ -8,7 +8,7 @@ import { authRouter} from "./api/auth.route";
 export const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: 'https://dogotracker.vercel.app',
     credentials: true
 }))
 app.use(express.json())
