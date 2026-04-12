@@ -4,7 +4,7 @@ import cors from 'cors'
 import fetch from "node-fetch"
 import jwt from "jsonwebtoken";
 import {requireAuth} from "@/middleware/requireAuth";
-
+import { authRouter} from "./api/auth.route";
 
 export const app = express();
 
@@ -14,17 +14,7 @@ app.use(cors({
 }))
 app.use(express.json())
 
-app.post("/login", (req, res) => {
-    const payload = {id: "test-user", email: "test@example.com"};
-
-    const token = jwt.sign(payload, process.env.JWT_SECRET!, {
-        expiresIn: "1h",
-        algorithm: "HS256",
-    })
-
-    res.json({token})
-})
-
+app.use("/auth", authRouter)
 app.use('/api/scan', requireAuth, scanRouter)
 
 app.get("/ai-test", async (req, res) => {
