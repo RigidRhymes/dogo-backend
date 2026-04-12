@@ -1,6 +1,7 @@
 import {getAuth} from "../../../lib/better-auth/auth";
+import { Request, Response, NextFunction } from "express";
 
-export const requireAuth = async (req, res, next) => {
+export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     const auth = await getAuth();
     const session = await auth.api.getSession({ headers: req.headers });
 
@@ -8,6 +9,6 @@ export const requireAuth = async (req, res, next) => {
         return res.status(401).json({ error: "Unauthorized" });
     }
 
-    req.user = session.user;
+    (req as any).user = session.user;
     next();
 };
