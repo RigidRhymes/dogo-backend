@@ -1,7 +1,7 @@
 import { betterAuth, type Auth, type BetterAuthOptions } from "better-auth"
 import { mongodbAdapter } from "better-auth/adapters/mongodb"
-import { connectToDatabase } from "../../../../database/mongoose"
 import { nextCookies } from "better-auth/next-js"
+import {connectToDatabase} from "../../../../database/mongoose";
 
 let authInstance: Auth<BetterAuthOptions> | undefined
 

@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAuth = void 0;
 const better_auth_1 = require("better-auth");
 const mongodb_1 = require("better-auth/adapters/mongodb");
-const mongoose_1 = require("@/database/mongoose");
+const mongoose_1 = require("../../../../database/mongoose");
 const next_js_1 = require("better-auth/next-js");
 let authInstance;
 const getAuth = async () => {
