@@ -2,7 +2,6 @@ import express from 'express';
 import {scanRouter} from "./api/scan.route";
 import cors from 'cors'
 import fetch from "node-fetch"
-import jwt from "jsonwebtoken";
 import {requireAuth} from "@/middleware/requireAuth";
 import { authRouter} from "./api/auth.route";
 
