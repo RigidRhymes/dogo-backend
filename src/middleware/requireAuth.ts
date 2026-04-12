@@ -1,4 +1,4 @@
-import {getAuth} from "lib/better-auth/auth";
+import {getAuth} from "../../../lib/better-auth/auth";
 import { Request, Response, NextFunction } from "express";
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {

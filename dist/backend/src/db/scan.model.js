@@ -32,23 +32,26 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.connectDB = connectDB;
-const mongoose_1 = __importDefault(require("mongoose"));
-const process = __importStar(require("node:process"));
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config({ path: ".env.local" });
-const MONGO_URI = process.env.MONGODB_URI;
-async function connectDB() {
-    try {
-        await mongoose_1.default.connect(MONGO_URI);
-        console.log("✅ Connected to MongoDB");
-    }
-    catch (err) {
-        console.error("❌ MongoDB connection failed:", err);
-        process.exit(1);
-    }
+exports.ScanModel = void 0;
+exports.createScan = createScan;
+exports.getScan = getScan;
+exports.updateScanResult = updateScanResult;
+const mongoose_1 = __importStar(require("mongoose"));
+const ScanSchema = new mongoose_1.Schema({
+    userId: { type: String, required: true },
+    email: { type: String, required: true },
+    status: { type: String, default: "queued" },
+    result: { type: Object },
+}, { timestamps: true });
+exports.ScanModel = mongoose_1.default.model("Scan", ScanSchema);
+async function createScan(userId, email) {
+    const scan = new exports.ScanModel({ userId, email, status: "queued" });
+    return await scan.save();
+}
+async function getScan(id, userId) {
+    return await exports.ScanModel.findOne({ _id: id, userId });
+}
+async function updateScanResult(id, result, status) {
+    return await exports.ScanModel.findByIdAndUpdate(id, { result, status }, { new: true });
 }
