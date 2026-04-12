@@ -73,6 +73,7 @@ scanRouter.get('/:id', requireAuth, async (req: Request & {user?: {id: string} }
         return res.json(result);
     } catch (err) {
         console.error('Scan fetch failed:', err);
+        const errorMessage = err instanceof Error ? err.message: String(err)
         return res.status(500).json({ error: 'Database error' })
     }
 })
