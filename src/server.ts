@@ -8,13 +8,19 @@ import { authRouter} from "./api/auth.route";
 export const app = express();
 
 app.use(cors({
-    origin: 'https://dogotracker.vercel.app',
+    origin: [/\.vercel\.app$/, "http://localhost:3000"],
     credentials: true
 }))
 app.use(express.json())
 
+
 app.use("/auth", authRouter)
 app.use('/api/scan', requireAuth, scanRouter)
+
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "true");
+    next();
+})
 
 app.get("/ai-test", async (req, res) => {
     const prompt = "Summarize risks of using an email found in breach.";

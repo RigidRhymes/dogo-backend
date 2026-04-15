@@ -1,22 +1,21 @@
-import { betterAuth, type Auth, type BetterAuthOptions } from "better-auth"
-import { mongodbAdapter } from "better-auth/adapters/mongodb"
-import { nextCookies } from "better-auth/next-js"
-import {connectToDatabase} from "@/database/mongoose";
+import { betterAuth, type Auth } from "better-auth";
+import { mongodbAdapter } from "better-auth/adapters/mongodb";
+import { nextCookies } from "better-auth/next-js";
+import { connectToDatabase } from "@/database/mongoose";
 
+let authInstance: Auth | undefined;
 
-let authInstance: Auth<BetterAuthOptions> | undefined
+export const getAuth = async (): Promise<Auth> => {
+    if (authInstance) return authInstance;
 
-export const getAuth = async (): Promise<Auth<BetterAuthOptions>> => {
-    if (authInstance) return authInstance
+    const mongoose = await connectToDatabase();
+    const db = mongoose.connection.db;
+    if (!db) throw new Error("Database not connected");
 
-    const mongoose = await connectToDatabase()
-    const db = mongoose.connection.db
-    if (!db) throw new Error("Database not connected")
-
-    authInstance = betterAuth<BetterAuthOptions>({
+    authInstance = betterAuth({
         database: mongodbAdapter(db),
-        secret: process.env.BETTER_AUTH_SECRET!,
-        baseURL: process.env.BETTER_AUTH_URL!,
+        secret: process.env.BETTER_AUTH_SECRET!,   // must be at least 32 chars
+        baseURL: process.env.BETTER_AUTH_URL!,     // e.g. https://dogotracker.vercel.app
         emailAndPassword: {
             enabled: true,
             disableSignUp: false,
@@ -25,8 +24,11 @@ export const getAuth = async (): Promise<Auth<BetterAuthOptions>> => {
             maxPasswordLength: 128,
             autoSignIn: true,
         },
-        plugins: [nextCookies()],
-    })
+        plugins: [nextCookies()]   // handles cookies automatically
+    });
 
-    return authInstance!
-}
+    return authInstance;
+};
+
+// Export type so client/server can infer features
+export type AuthType = Awaited<ReturnType<typeof getAuth>>;
