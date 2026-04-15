@@ -1,9 +1,13 @@
 import { Request, Response, NextFunction } from "express";
-import {getAuth} from "@/lib/better-auth/auth";
-
+import { getAuth } from "@/lib/better-auth/auth";
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     const auth = await getAuth();
+
+    // 1. ADD THIS GUARD: This clears the TS18048 error
+    if (!auth) {
+        return res.status(500).json({ error: "Auth instance not found" });
+    }
 
     // Convert IncomingHttpHeaders → Headers
     const headers = new Headers();
@@ -13,6 +17,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         }
     }
 
+    // Now 'auth' is guaranteed to be defined here
     const session = await auth.api.getSession({ headers });
 
     if (!session?.user) {
