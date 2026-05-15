@@ -13,18 +13,25 @@ export const requireAuth = async ( req: Request, res: Response, next: NextFuncti
 
         const authHeader = req.headers.authorization;
         if(authHeader && authHeader.startsWith("Bearer")){
-            const token = authHeader.split(" ")[1];
+            const parts = authHeader.split(" ")
+            const tokenValue = parts[1];
 
-            if(token){
+            if(tokenValue){
             const manualHeaders = new Headers();
-            manualHeaders.append("Cookie", `better-auth.session_token=${token}`);
+            manualHeaders.append("Cookie", `better-auth.session_token=${tokenValue}`);
             headers = manualHeaders;
             }
         }
 
         const session = await auth.api.getSession({ headers })
 
-        if(!session?.user) return res.status(401).json({ error: "Unauthorized" });
+        if(!session?.user) {
+            console.warn("Better Auth session validation failed for raw header:", authHeader)
+
+            return res.status(401).json({error: "Unauthorized"})
+
+
+        }
 
         (req as any).user = {
             id: session.user.id,
