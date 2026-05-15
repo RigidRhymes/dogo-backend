@@ -15,9 +15,11 @@ export const requireAuth = async ( req: Request, res: Response, next: NextFuncti
         if(authHeader && authHeader.startsWith("Bearer")){
             const token = authHeader.split(" ")[1];
 
+            if(token){
             const manualHeaders = new Headers();
             manualHeaders.append("Cookie", `better-auth.session_token=${token}`);
             headers = manualHeaders;
+            }
         }
 
         const session = await auth.api.getSession({ headers })
