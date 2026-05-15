@@ -3,8 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAuth = void 0;
 const better_auth_1 = require("better-auth");
 const mongodb_1 = require("better-auth/adapters/mongodb");
-const mongoose_1 = require("../../../../database/mongoose");
 const next_js_1 = require("better-auth/next-js");
+const mongoose_1 = require("@/database/mongoose");
+// 1. DO NOT use the "Auth" type here.
+// We use 'any' for the placeholder or 'ReturnType<typeof betterAuth>'
 let authInstance;
 const getAuth = async () => {
     if (authInstance)
@@ -13,6 +15,8 @@ const getAuth = async () => {
     const db = mongoose.connection.db;
     if (!db)
         throw new Error("Database not connected");
+    // 2. DO NOT use betterAuth<BetterAuthOptions>(...)
+    // Just call the function directly so it can infer your specific setup.
     authInstance = (0, better_auth_1.betterAuth)({
         database: (0, mongodb_1.mongodbAdapter)(db),
         secret: process.env.BETTER_AUTH_SECRET,

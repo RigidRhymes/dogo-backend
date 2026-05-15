@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.scanRouter = void 0;
 const express_1 = require("express");
-const scan_model_1 = require("@/db/scan.model");
+const requireAuth_1 = require("@/middleware/requireAuth");
+const scan_mongo_1 = require("@/db/scan.mongo");
 const scanEmailRisk_1 = require("./scanEmailRisk");
-const requireAuth_1 = require("../middleware/requireAuth");
 // This file is for search mentions
 exports.scanRouter = (0, express_1.Router)();
 exports.scanRouter.post('/', requireAuth_1.requireAuth, async (req, res) => {
@@ -14,7 +14,8 @@ exports.scanRouter.post('/', requireAuth_1.requireAuth, async (req, res) => {
         return res.status(401).json({ error: 'Unauthorized' });
     }
     try {
-        const scan = await (0, scan_model_1.createScan)(userId, email);
+        const scanId = `scan-${Date.now()}`;
+        const scan = await scan_mongo_1.Scan.create({ id: scanId, user_id: userId, email, status: 'queued' });
         res.status(201).json({ scanId: scan.id });
         setTimeout(async () => {
             try {
@@ -39,12 +40,12 @@ exports.scanRouter.post('/', requireAuth_1.requireAuth, async (req, res) => {
                 };
                 console.log(`Scanning email: ${email}`);
                 console.log(`Found ${riskResult.publicMentions.length} mentions`);
-                await (0, scan_model_1.updateScanResult)(scan.id, result, 'completed');
+                await scan_mongo_1.Scan.findOneAndUpdate({ id: scan.id }, { result, status: 'completed' });
             }
             catch (err) {
                 console.error("Failed to update scan status", err);
                 const errorMessage = err instanceof Error ? err.message : String(err);
-                await (0, scan_model_1.updateScanResult)(scan.id, { error: errorMessage }, 'failed');
+                await scan_mongo_1.Scan.findOneAndUpdate({ id: scan.id }, { result: { error: errorMessage }, status: 'failed' });
             }
         }, 5000);
     }
@@ -56,7 +57,7 @@ exports.scanRouter.post('/', requireAuth_1.requireAuth, async (req, res) => {
 exports.scanRouter.get('/:id', requireAuth_1.requireAuth, async (req, res) => {
     const { id } = req.params;
     try {
-        const result = await (0, scan_model_1.getScan)(id, req.user?.id);
+        const result = await scan_mongo_1.Scan.findOne({ id, user_id: req.user?.id });
         if (!result) {
             return res.status(404).json({ error: 'Scan not found' });
         }
@@ -64,7 +65,6 @@ exports.scanRouter.get('/:id', requireAuth_1.requireAuth, async (req, res) => {
     }
     catch (err) {
         console.error('Scan fetch failed:', err);
-        const errorMessage = err instanceof Error ? err.message : String(err);
         return res.status(500).json({ error: 'Database error' });
     }
 });
