@@ -8,7 +8,7 @@ import {requireAuth} from "@/middleware/requireAuth";
 // This file is for search mentions
 export const scanRouter = Router();
 
-scanRouter.post('/', requireAuth, async (req: Request & { user?: { id: string; email?: string } }, res) => {
+scanRouter.post('/', async (req: Request & { user?: { id: string; email?: string } }, res) => {
     const { email } = req.body as { email: string };
     const userId = req.user?.id;
 
