@@ -1,22 +1,19 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAuth = void 0;
 /* @ts-nocheck */
-const better_auth_1 = require("better-auth");
-const mongodb_1 = require("better-auth/adapters/mongodb");
-const next_js_1 = require("better-auth/next-js");
-const mongoose_1 = require("../../database/mongoose");
+import { betterAuth } from "better-auth";
+import { mongodbAdapter } from "better-auth/adapters/mongodb";
+import { nextCookies } from "better-auth/next-js";
+import { connectToDatabase } from "../../database/mongoose";
 let authInstance;
-const getAuth = async () => {
+export const getAuth = async () => {
     if (authInstance)
         return authInstance;
-    const mongoose = await (0, mongoose_1.connectToDatabase)();
+    const mongoose = await connectToDatabase();
     const db = mongoose.connection.db;
     if (!db)
         throw new Error("Database not connected");
     // @ts-ignore - pre-existing better-auth type compatibility issue
-    authInstance = (0, better_auth_1.betterAuth)({
-        database: (0, mongodb_1.mongodbAdapter)(db),
+    authInstance = betterAuth({
+        database: mongodbAdapter(db),
         secret: process.env.BETTER_AUTH_SECRET, // must be at least 32 chars
         baseURL: process.env.BETTER_AUTH_URL, // e.g. https://dogotracker.vercel.app
         emailAndPassword: {
@@ -27,8 +24,7 @@ const getAuth = async () => {
             maxPasswordLength: 128,
             autoSignIn: true,
         },
-        plugins: [(0, next_js_1.nextCookies)()] // handles cookies automatically
+        plugins: [nextCookies()] // handles cookies automatically
     });
     return authInstance;
 };
-exports.getAuth = getAuth;

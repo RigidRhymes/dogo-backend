@@ -1,11 +1,5 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Scan = void 0;
-const mongoose_1 = __importDefault(require("mongoose"));
-const scanSchema = new mongoose_1.default.Schema({
+import mongoose from "mongoose";
+const scanSchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     user_id: { type: String, required: true },
     email: { type: String },
@@ -19,4 +13,4 @@ const scanSchema = new mongoose_1.default.Schema({
     status: { type: String, enum: ["queued", "processing", "completed", "failed"], default: "queued" },
     result: { type: Object },
 }, { timestamps: true });
-exports.Scan = mongoose_1.default.models.Scan || mongoose_1.default.model("Scan", scanSchema);
+export const Scan = mongoose.models.Scan || mongoose.model("Scan", scanSchema);

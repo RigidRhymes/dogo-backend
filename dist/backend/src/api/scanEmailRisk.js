@@ -1,8 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.scanEmailRisk = scanEmailRisk;
-const checkGravatar_1 = require("../utils/checkGravatar");
-async function scanEmailRisk(email) {
+import { checkGravatar, generateAISummary, searchEmailMentions, searchGitHub, emailScanner } from "../utils/checkGravatar";
+export async function scanEmailRisk(email) {
     const results = {
         email,
         isValid: false,
@@ -13,12 +10,12 @@ async function scanEmailRisk(email) {
         summary: ''
     };
     //     1. Email Verification
-    results.isValid = await (0, checkGravatar_1.emailScanner)(email); //via Hunter.io
+    results.isValid = await emailScanner(email); //via Hunter.io
     //     2. Gravatar Check
-    results.hasGravatar = await (0, checkGravatar_1.checkGravatar)(email);
+    results.hasGravatar = await checkGravatar(email);
     //     3. GitHub usage
-    results.foundOnGitHub = await (0, checkGravatar_1.searchGitHub)(email);
-    results.publicMentions = await (0, checkGravatar_1.searchEmailMentions)(email);
-    results.summary = await (0, checkGravatar_1.generateAISummary)(results);
+    results.foundOnGitHub = await searchGitHub(email);
+    results.publicMentions = await searchEmailMentions(email);
+    results.summary = await generateAISummary(results);
     return results;
 }

@@ -1,9 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.requireAuth = void 0;
-const auth_1 = require("../../../lib/better-auth/auth"); // @ts-ignore
-const requireAuth = async (req, res, next) => {
-    const auth = await (0, auth_1.getAuth)();
+import { getAuth } from "../../../lib/better-auth/auth"; // @ts-ignore
+export const requireAuth = async (req, res, next) => {
+    const auth = await getAuth();
     // 1. ADD THIS GUARD: This clears the TS18048 error
     if (!auth) {
         return res.status(500).json({ error: "Auth instance not found" });
@@ -23,4 +20,3 @@ const requireAuth = async (req, res, next) => {
     req.user = session.user;
     next();
 };
-exports.requireAuth = requireAuth;

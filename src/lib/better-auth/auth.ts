@@ -17,7 +17,7 @@ export const getAuth = async () => {
 
     // 2. DO NOT use betterAuth<BetterAuthOptions>(...)
     // Just call the function directly so it can infer your specific setup.
-    // @ts-ignore - pre-existing better-auth type compatibility issue
+    // @ts-expect-error - pre-existing better-auth type compatibility issue
     authInstance = betterAuth({
         database: mongodbAdapter(db),
         secret: process.env.BETTER_AUTH_SECRET!,

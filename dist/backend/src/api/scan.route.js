@@ -1,13 +1,10 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.scanRouter = void 0;
-const express_1 = require("express");
-const requireAuth_1 = require("../middleware/requireAuth");
-const scan_mongo_1 = require("../db/scan.mongo");
-const scanEmailRisk_1 = require("./scanEmailRisk");
+import { Router } from 'express';
+import { requireAuth } from "../middleware/requireAuth";
+import { Scan } from "../db/scan.mongo";
+import { scanEmailRisk } from "./scanEmailRisk";
 // This file is for search mentions
-exports.scanRouter = (0, express_1.Router)();
-exports.scanRouter.post('/', requireAuth_1.requireAuth, async (req, res) => {
+export const scanRouter = Router();
+scanRouter.post('/', requireAuth, async (req, res) => {
     const { email } = req.body;
     const userId = req.user?.id;
     if (!userId) {
@@ -15,11 +12,11 @@ exports.scanRouter.post('/', requireAuth_1.requireAuth, async (req, res) => {
     }
     try {
         const scanId = `scan-${Date.now()}`;
-        const scan = await scan_mongo_1.Scan.create({ id: scanId, user_id: userId, email, status: 'queued' });
+        const scan = await Scan.create({ id: scanId, user_id: userId, email, status: 'queued' });
         res.status(201).json({ scanId: scan.id });
         setTimeout(async () => {
             try {
-                const riskResult = await (0, scanEmailRisk_1.scanEmailRisk)(email);
+                const riskResult = await scanEmailRisk(email);
                 const breaches = riskResult.publicMentions.map((url) => ({
                     name: new URL(url).hostname,
                     date: new Date().toISOString(),
@@ -40,12 +37,12 @@ exports.scanRouter.post('/', requireAuth_1.requireAuth, async (req, res) => {
                 };
                 console.log(`Scanning email: ${email}`);
                 console.log(`Found ${riskResult.publicMentions.length} mentions`);
-                await scan_mongo_1.Scan.findOneAndUpdate({ id: scan.id }, { result, status: 'completed' }, { new: true }).lean();
+                await Scan.findOneAndUpdate({ id: scan.id }, { result, status: 'completed' }, { new: true }).lean();
             }
             catch (err) {
                 console.error("Failed to update scan status", err);
                 const errorMessage = err instanceof Error ? err.message : String(err);
-                await scan_mongo_1.Scan.findOneAndUpdate({ id: scan.id }, { result: { error: errorMessage }, status: 'failed' }, { new: true }).lean();
+                await Scan.findOneAndUpdate({ id: scan.id }, { result: { error: errorMessage }, status: 'failed' }, { new: true }).lean();
             }
         }, 5000);
     }
@@ -54,10 +51,10 @@ exports.scanRouter.post('/', requireAuth_1.requireAuth, async (req, res) => {
         return res.status(500).json({ error: 'Database error' });
     }
 });
-exports.scanRouter.get('/:id', requireAuth_1.requireAuth, async (req, res) => {
+scanRouter.get('/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
     try {
-        const result = await scan_mongo_1.Scan.findOne({ id, user_id: req.user?.id }).lean();
+        const result = await Scan.findOne({ id, user_id: req.user?.id }).lean();
         if (!result) {
             return res.status(404).json({ error: 'Scan not found' });
         }

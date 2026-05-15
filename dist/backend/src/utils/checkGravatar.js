@@ -1,21 +1,11 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkGravatar = checkGravatar;
-exports.searchGitHub = searchGitHub;
-exports.searchEmailMentions = searchEmailMentions;
-exports.emailScanner = emailScanner;
-exports.generateAISummary = generateAISummary;
-const crypto_1 = __importDefault(require("crypto"));
-async function checkGravatar(email) {
-    const hash = crypto_1.default.createHash("md5").update(email.trim().toLowerCase()).digest("hex");
+import crypto from "crypto";
+export async function checkGravatar(email) {
+    const hash = crypto.createHash("md5").update(email.trim().toLowerCase()).digest("hex");
     const url = `https://www.gravatar.com/avatar/${hash}?d=404`;
     const res = await fetch(url);
     return res.status === 200;
 }
-async function searchGitHub(email, username) {
+export async function searchGitHub(email, username) {
     const headers = {
         Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
         Accept: "application/vnd.github.cloak-preview+json"
@@ -30,7 +20,7 @@ async function searchGitHub(email, username) {
     const data = await res.json();
     return data.total_count > 0;
 }
-async function searchEmailMentions(email) {
+export async function searchEmailMentions(email) {
     const query = `"${email}"`;
     const url = `https://serpapi.com/search.json?q=${encodeURIComponent(query)}&api_key=${process.env.SERPAPI_KEY}&num=10`;
     const res = await fetch(url);
@@ -40,7 +30,7 @@ async function searchEmailMentions(email) {
     }
     return [];
 }
-async function emailScanner(email) {
+export async function emailScanner(email) {
     const apiKey = process.env.HUNTER_API_KEY;
     if (!apiKey) {
         console.error("Missing HUNTER_API_KEY in environment variables");
@@ -62,7 +52,7 @@ async function emailScanner(email) {
         return false;
     }
 }
-async function generateAISummary(results) {
+export async function generateAISummary(results) {
     const prompt = `
     You are an email risk scanning agent.
     Analyze the following signals for the email: ${results.email}
