@@ -1,21 +1,28 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getAuth = void 0;
 /* @ts-nocheck */
-import { betterAuth } from "better-auth";
-import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { nextCookies } from "better-auth/next-js";
-import { connectToDatabase } from "../../database/mongoose";
+const better_auth_1 = require("better-auth");
+const mongodb_1 = require("better-auth/adapters/mongodb");
+const next_js_1 = require("better-auth/next-js");
+const mongoose_1 = require("../../database/mongoose");
+// 1. DO NOT use the "Auth" type here.
+// We use 'any' for the placeholder or 'ReturnType<typeof betterAuth>'
 let authInstance;
-export const getAuth = async () => {
+const getAuth = async () => {
     if (authInstance)
         return authInstance;
-    const mongoose = await connectToDatabase();
+    const mongoose = await (0, mongoose_1.connectToDatabase)();
     const db = mongoose.connection.db;
     if (!db)
         throw new Error("Database not connected");
-    // @ts-ignore - pre-existing better-auth type compatibility issue
-    authInstance = betterAuth({
-        database: mongodbAdapter(db),
-        secret: process.env.BETTER_AUTH_SECRET, // must be at least 32 chars
-        baseURL: process.env.BETTER_AUTH_URL, // e.g. https://dogotracker.vercel.app
+    // 2. DO NOT use betterAuth<BetterAuthOptions>(...)
+    // Just call the function directly so it can infer your specific setup.
+    // @ts-expect-error - pre-existing better-auth type compatibility issue
+    authInstance = (0, better_auth_1.betterAuth)({
+        database: (0, mongodb_1.mongodbAdapter)(db),
+        secret: process.env.BETTER_AUTH_SECRET,
+        baseURL: process.env.BETTER_AUTH_URL,
         emailAndPassword: {
             enabled: true,
             disableSignUp: false,
@@ -24,7 +31,8 @@ export const getAuth = async () => {
             maxPasswordLength: 128,
             autoSignIn: true,
         },
-        plugins: [nextCookies()] // handles cookies automatically
+        plugins: [(0, next_js_1.nextCookies)()],
     });
     return authInstance;
 };
+exports.getAuth = getAuth;

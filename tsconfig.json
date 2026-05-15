@@ -13,9 +13,9 @@
     "skipLibCheck": true,
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "paths": {
-      "@/middleware/*": ["/src/middleware/*"],
+      "@/middleware/*": ["./src/middleware/*"],
       "@/database/*": ["./src/database/*"],
-      "@/db/*": ["./src/lib/*"],
+      "@/db/*": ["./src/db/*"],
       "@/*": ["./src/*"],
       "@/lib/*": ["./src/lib/*"],
     }

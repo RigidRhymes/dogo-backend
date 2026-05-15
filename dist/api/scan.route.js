@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.scanRouter = void 0;
 const express_1 = require("express");
-const requireAuth_1 = require("../backend/src/middleware/requireAuth");
-const scan_mongo_1 = require("../backend/src/db/scan.mongo");
+const requireAuth_1 = require("../middleware/requireAuth");
+const scan_mongo_1 = require("../db/scan.mongo");
 const scanEmailRisk_1 = require("./scanEmailRisk");
 // This file is for search mentions
 exports.scanRouter = (0, express_1.Router)();

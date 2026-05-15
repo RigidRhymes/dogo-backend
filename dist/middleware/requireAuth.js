@@ -1,26 +1,29 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.requireAuth = void 0;
-const auth_1 = require("../lib/better-auth/auth"); // @ts-ignore
+const auth_1 = require("../lib/better-auth/auth");
+// 1. Import the native header conversion utility from the node bundle
+const node_1 = require("better-auth/node");
 const requireAuth = async (req, res, next) => {
     const auth = await (0, auth_1.getAuth)();
-    // 1. ADD THIS GUARD: This clears the TS18048 error
     if (!auth) {
         return res.status(500).json({ error: "Auth instance not found" });
     }
-    // Convert IncomingHttpHeaders → Headers
-    const headers = new Headers();
-    for (const [key, value] of Object.entries(req.headers)) {
-        if (value !== undefined) {
-            headers.append(key, Array.isArray(value) ? value.join(",") : String(value));
+    try {
+        // 2. Pass headers directly at the root of the input argument payload
+        const session = await auth.api.getSession({
+            headers: (0, node_1.fromNodeHeaders)(req.headers) // ✅ Correctly handled by the Better Auth parser
+        });
+        if (!session?.user) {
+            return res.status(401).json({ error: "Unauthorized" });
         }
+        // Bind the validated user profile data to the pipeline context
+        req.user = session.user;
+        return next();
     }
-    // Now 'auth' is guaranteed to be defined here
-    const session = await auth.api.getSession({ headers });
-    if (!session?.user) {
-        return res.status(401).json({ error: "Unauthorized" });
+    catch (error) {
+        console.error("Auth middleware exception:", error);
+        return res.status(500).json({ error: "Internal Authentication Error" });
     }
-    req.user = session.user;
-    next();
 };
 exports.requireAuth = requireAuth;
