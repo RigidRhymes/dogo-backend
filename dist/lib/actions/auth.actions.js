@@ -1,9 +1,9 @@
-"use strict";
 'use server';
+"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.signInWithEmail = exports.signOUt = exports.signUpWithEmail = void 0;
 const headers_1 = require("next/headers");
-const auth_1 = require("@/lib/better-auth/auth");
+const auth_1 = require("../better-auth/auth");
 const signUpWithEmail = async ({ email, password, fullName }) => {
     try {
         const auth = await (0, auth_1.getAuth)();

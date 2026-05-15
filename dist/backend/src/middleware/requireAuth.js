@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.requireAuth = void 0;
-const auth_1 = require("@/lib/better-auth/auth");
+const auth_1 = require("../../../lib/better-auth/auth"); // @ts-ignore
 const requireAuth = async (req, res, next) => {
     const auth = await (0, auth_1.getAuth)();
     // 1. ADD THIS GUARD: This clears the TS18048 error

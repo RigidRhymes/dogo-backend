@@ -16,7 +16,7 @@ const scanSchema = new mongoose_1.default.Schema({
             status: { type: String },
             result: { type: String },
         }],
-    status: { type: String, enum: ["queued", "completed", "failed"], default: "queued" },
+    status: { type: String, enum: ["queued", "processing", "completed", "failed"], default: "queued" },
     result: { type: Object },
 }, { timestamps: true });
-exports.Scan = mongoose_1.default.model("Scan", scanSchema);
+exports.Scan = mongoose_1.default.models.Scan || mongoose_1.default.model("Scan", scanSchema);

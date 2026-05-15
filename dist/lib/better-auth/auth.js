@@ -1,10 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAuth = void 0;
+/* @ts-nocheck */
 const better_auth_1 = require("better-auth");
 const mongodb_1 = require("better-auth/adapters/mongodb");
 const next_js_1 = require("better-auth/next-js");
-const mongoose_1 = require("@/database/mongoose");
+const mongoose_1 = require("../../database/mongoose");
 let authInstance;
 const getAuth = async () => {
     if (authInstance)
@@ -13,6 +14,7 @@ const getAuth = async () => {
     const db = mongoose.connection.db;
     if (!db)
         throw new Error("Database not connected");
+    // @ts-ignore - pre-existing better-auth type compatibility issue
     authInstance = (0, better_auth_1.betterAuth)({
         database: (0, mongodb_1.mongodbAdapter)(db),
         secret: process.env.BETTER_AUTH_SECRET, // must be at least 32 chars

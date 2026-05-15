@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.scanRouter = void 0;
 const express_1 = require("express");
-const scan_model_1 = require("@/db/scan.model");
+const scan_model_1 = require("../../backend/src/db/scan.model");
 const scanEmailRisk_1 = require("./scanEmailRisk");
 const requireAuth_1 = require("../middleware/requireAuth");
 // This file is for search mentions

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getAuth } from "@/lib/better-auth/auth";
+import { getAuth } from "@/lib/better-auth/auth"; // @ts-ignore
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     const auth = await getAuth();

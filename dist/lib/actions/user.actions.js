@@ -1,8 +1,8 @@
-"use strict";
 'user server';
+"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllUserForNewsEmail = void 0;
-const mongoose_1 = require("@/database/mongoose");
+const mongoose_1 = require("../../database/mongoose");
 const getAllUserForNewsEmail = async () => {
     try {
         const mongoose = await (0, mongoose_1.connectToDatabase)();

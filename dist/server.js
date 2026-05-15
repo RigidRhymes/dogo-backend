@@ -8,7 +8,7 @@ const express_1 = __importDefault(require("express"));
 const scan_route_1 = require("./api/scan.route");
 const cors_1 = __importDefault(require("cors"));
 const node_fetch_1 = __importDefault(require("node-fetch"));
-const requireAuth_1 = require("@/middleware/requireAuth");
+const requireAuth_1 = require("./backend/src/middleware/requireAuth");
 const auth_route_1 = require("./api/auth.route");
 exports.app = (0, express_1.default)();
 exports.app.use((0, cors_1.default)({

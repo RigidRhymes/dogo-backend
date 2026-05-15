@@ -47,11 +47,11 @@ scanRouter.post('/', requireAuth, async (req: Request & { user?: { id: string; e
                 console.log(`Scanning email: ${email}`);
                 console.log(`Found ${riskResult.publicMentions.length} mentions`);
 
-                await Scan.findOneAndUpdate({ id: scan.id }, { result, status: 'completed' });
+                await Scan.findOneAndUpdate({ id: scan.id } as any, { result, status: 'completed' }, { new: true } as any).lean();
             } catch (err) {
                 console.error("Failed to update scan status", err);
                 const errorMessage = err instanceof Error ? err.message : String(err);
-                await Scan.findOneAndUpdate({ id: scan.id }, { result: { error: errorMessage }, status: 'failed' });
+                await Scan.findOneAndUpdate({ id: scan.id } as any, { result: { error: errorMessage }, status: 'failed' }, { new: true } as any).lean();
             }
         }, 5000);
 
@@ -65,7 +65,7 @@ scanRouter.get('/:id', requireAuth, async (req: Request & {user?: {id: string} }
     const {id} = req.params;
 
     try {
-        const result = await Scan.findOne({ id, user_id: req.user?.id });
+        const result = await Scan.findOne({ id, user_id: req.user?.id } as any).lean();
 
         if (!result) {
             return res.status(404).json({ error: 'Scan not found' })

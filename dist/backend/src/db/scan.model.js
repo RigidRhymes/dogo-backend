@@ -1,57 +1,63 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ScanModel = void 0;
 exports.createScan = createScan;
 exports.getScan = getScan;
+exports.updateScanStatus = updateScanStatus;
 exports.updateScanResult = updateScanResult;
-const mongoose_1 = __importStar(require("mongoose"));
-const ScanSchema = new mongoose_1.Schema({
-    userId: { type: String, required: true },
-    email: { type: String, required: true },
-    status: { type: String, default: "queued" },
-    result: { type: Object },
-}, { timestamps: true });
-exports.ScanModel = mongoose_1.default.model("Scan", ScanSchema);
-async function createScan(userId, email) {
-    const scan = new exports.ScanModel({ userId, email, status: "queued" });
-    return await scan.save();
+const index_1 = require("../db/index");
+const scan_mongo_1 = require("./scan.mongo");
+async function ensureBreachTable() {
+    await (0, index_1.connectDB)();
+}
+async function createScan(input) {
+    await ensureBreachTable();
+    const scanId = `scan-${Date.now()}`;
+    const newScan = new scan_mongo_1.Scan({
+        id: scanId,
+        user_id: input.userId,
+        email: input.email,
+        phone: input.phone,
+        social_media: input.social_media ? [input.social_media] : [],
+        status: 'queued'
+    });
+    await newScan.save();
+    return { id: scanId };
 }
 async function getScan(id, userId) {
-    return await exports.ScanModel.findOne({ _id: id, userId });
+    await ensureBreachTable();
+    const scan = await scan_mongo_1.Scan.findOne({ id: id, user_id: userId }).lean();
+    if (!scan)
+        return null;
+    return {
+        id: scan.id,
+        user_id: scan.user_id,
+        email: scan.email,
+        phone: scan.phone,
+        social_media: scan.social_media,
+        status: scan.status,
+        result: scan.result,
+        created_at: scan.createdAt,
+        updated_at: scan.updatedAt
+    };
 }
-async function updateScanResult(id, result, status) {
-    return await exports.ScanModel.findByIdAndUpdate(id, { result, status }, { new: true });
+async function updateScanStatus(id, status) {
+    await ensureBreachTable();
+    const scan = await scan_mongo_1.Scan.findOneAndUpdate({ id: id }, { status: status }, { new: true }).lean();
+    if (!scan)
+        return null;
+    return {
+        id: scan.id,
+        status: scan.status,
+    };
+}
+async function updateScanResult(id, scanResult, status) {
+    await ensureBreachTable();
+    const scan = await scan_mongo_1.Scan.findOneAndUpdate({ id: id }, { status: status, result: scanResult }, { new: true }).lean();
+    if (!scan)
+        return null;
+    return {
+        id: scan.id,
+        status: scan.status,
+        result: scan.result,
+    };
 }
