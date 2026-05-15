@@ -1,31 +1,38 @@
 import { Request, Response, NextFunction } from "express";
-import { getAuth } from "@/lib/better-auth/auth";
-// 1. Import the native header conversion utility from the node bundle
+import { getAuth } from '@/lib/better-auth/auth';
 import { fromNodeHeaders } from "better-auth/node";
 
-export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
+
+export const requireAuth = async ( req: Request, res: Response, next: NextFunction) => {
     const auth = await getAuth();
 
-    if (!auth) {
-        return res.status(500).json({ error: "Auth instance not found" });
-    }
+    if(!auth) return res.status(500).json({ error: "Auth instance not found"})
 
     try {
-        // 2. Pass headers directly at the root of the input argument payload
-        const session = await auth.api.getSession({
-            headers: fromNodeHeaders(req.headers) // ✅ Correctly handled by the Better Auth parser
-        });
+        let headers = fromNodeHeaders(req.headers);
 
-        if (!session?.user) {
-            return res.status(401).json({ error: "Unauthorized" });
+        const authHeader = req.headers.authorization;
+        if(authHeader && authHeader.startsWith("Bearer")){
+            const token = authHeader.split(" ")[1];
+
+            const manualHeaders = new Headers();
+            manualHeaders.append("Cookie", `better-auth.session_token=${token}`);
+            headers = manualHeaders;
         }
 
-        // Bind the validated user profile data to the pipeline context
-        (req as any).user = session.user;
+        const session = await auth.api.getSession({ headers })
+
+        if(!session?.user) return res.status(401).json({ error: "Unauthorized" });
+
+        (req as any).user = {
+            id: session.user.id,
+            email: session.user.email,
+        }
+
         return next();
 
-    } catch (error) {
-        console.error("Auth middleware exception:", error);
+    }catch (error){
+        console.error("Auth middleware error: ", error);
         return res.status(500).json({ error: "Internal Authentication Error" });
     }
-};
+}
