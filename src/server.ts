@@ -17,11 +17,6 @@ app.use(express.json())
 app.use("/auth", authRouter)
 app.use('/api/scan', requireAuth, scanRouter)
 
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "true");
-    next();
-})
-
 app.get("/ai-test", async (req, res) => {
     const prompt = "Summarize risks of using an email found in breach.";
 
