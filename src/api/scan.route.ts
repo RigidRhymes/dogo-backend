@@ -1,7 +1,8 @@
 import { Router, Request } from 'express';
 import { Scan } from "@/db/scan.mongo";
 import { scanEmailRisk } from "./scanEmailRisk";
-import requireAuth from "@/middleware/requireAuth";
+import {requireAuth} from "@/middleware/requireAuth";
+
 
 
 
