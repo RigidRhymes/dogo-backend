@@ -13,7 +13,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         }
 
         if(!tokenValue && req.cookies){
-            tokenValue = req.cookies["better-auth.session"] || null
+            tokenValue = req.cookies["better-auth.session_token"] || null
         }
 
         if(!tokenValue){

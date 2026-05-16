@@ -4,6 +4,7 @@ import cors from 'cors'
 import fetch from "node-fetch"
 import {requireAuth} from "@/middleware/requireAuth";
 import { authRouter} from "./api/auth.route";
+import cookieParser from "cookie-parser";
 
 export const app = express();
 
@@ -12,6 +13,8 @@ app.use(cors({
     credentials: true
 }))
 app.use(express.json())
+
+app.use(cookieParser());
 
 
 app.use("/auth", authRouter)
