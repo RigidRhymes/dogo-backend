@@ -20,6 +20,8 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
             return res.status(401).json({ error: "Unauthorized - No token provider "})
         }
 
+        console.log("Incoming cookies:", req.cookies)
+
         const db = mongoose.connection.db;
         if(!db){
             return res.status(500).json({ error: "Internal Authentication system failure"})
