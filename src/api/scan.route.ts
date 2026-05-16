@@ -1,13 +1,18 @@
 import { Router, Request } from 'express';
 import { Scan } from "@/db/scan.mongo";
 import { scanEmailRisk } from "./scanEmailRisk";
+import {requireAuth} from "@/middleware/requireAuth";
+
+
+
 
 export const scanRouter = Router();
 
-// Protected automatically by app.ts global mounting layer
-scanRouter.post('/', async (req: Request & { user?: { id: string; email?: string } }, res) => {
+// 1. FIX: Added requireAuth middleware directly to the POST route
+scanRouter.post('/', requireAuth, async (req: Request & { user?: { id: string; email?: string } }, res) => {
     const { email } = req.body as { email: string };
 
+    // Safety check: ensure email was actually provided in the request body
     if (!email) {
         return res.status(400).json({ error: 'Email field is required' });
     }
@@ -21,9 +26,10 @@ scanRouter.post('/', async (req: Request & { user?: { id: string; email?: string
         const scanId = `scan-${Date.now()}`;
         const scan = await Scan.create({ id: scanId, user_id: userId, email, status: 'queued' });
 
+        // Return JSON immediately to prevent client-side timeouts
         res.status(201).json({ scanId: scan.id });
 
-        // Background simulation worker thread
+        // Background worker simulation
         setTimeout(async () => {
             try {
                 const riskResult = await scanEmailRisk(email);
@@ -55,6 +61,7 @@ scanRouter.post('/', async (req: Request & { user?: { id: string; email?: string
                     { result, status: 'completed' },
                     { new: true } as any
                 ).lean();
+
             } catch (err) {
                 console.error("Failed to update scan status", err);
                 const errorMessage = err instanceof Error ? err.message : String(err);
@@ -72,8 +79,8 @@ scanRouter.post('/', async (req: Request & { user?: { id: string; email?: string
     }
 });
 
-// Protected automatically by app.ts global mounting layer
-scanRouter.get('/:id', async (req: Request & { user?: { id: string } }, res) => {
+// 2. GET route remains protected, verify MongoDB filter uses string comparison safely
+scanRouter.get('/:id', requireAuth, async (req: Request & { user?: { id: string } }, res) => {
     const { id } = req.params;
     const userId = req.user?.id;
 
